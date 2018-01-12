@@ -34,4 +34,5 @@ public class capture extends AppCompatActivity {
             camera_view.addView(mCameraView);//add the SurfaceView to the layout
         }
     }
+
 }
