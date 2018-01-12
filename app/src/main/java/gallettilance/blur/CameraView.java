@@ -17,7 +17,6 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback{
 
         mCamera = camera;
         // mCamera.setDisplayOrientation(90);
-        //get the holder and set this class as the callback, so we can get camera data here
         mHolder = getHolder();
         mHolder.addCallback(this);
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_NORMAL);
@@ -26,7 +25,6 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback{
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
         try{
-            //when the surface is created, we can set the camera to draw images in this surfaceholder
             mCamera.setPreviewDisplay(surfaceHolder);
             mCamera.startPreview();
         } catch (IOException e) {
@@ -36,17 +34,16 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback{
 
     @Override
     public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i2, int i3) {
-        //before changing the application orientation, you need to stop the preview, rotate and then start it again
-        if(mHolder.getSurface() == null)//check if the surface is ready to receive camera data
+
+        if(mHolder.getSurface() == null)
             return;
 
         try{
             mCamera.stopPreview();
         } catch (Exception e){
-            //this will happen when you are trying the camera if it's not running
+            //if camera is not running
         }
 
-        //now, recreate the camera preview
         try{
             mCamera.setPreviewDisplay(mHolder);
             mCamera.startPreview();
@@ -57,10 +54,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback{
 
     @Override
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-        //our app has only one screen, so we'll destroy the camera in the surface
-        //if you are unsing with more screens, please move this code your activity
-        mCamera.stopPreview();
-        mCamera.release();
+        //do nothing
     }
 
 }

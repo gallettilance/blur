@@ -25,19 +25,18 @@
             android:layout_height="fill_parent"
             android:layout_weight="1" />
 
-
-        <ImageView
-            android:id="@+id/mImageView"
-            android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="10dp"
-            android:src="@drawable/ic_launcher_foreground"></ImageView>
-
     </LinearLayout>
 
-
+    <TextView
+        android:id="@+id/mTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="        "
+        app:layout_constraintBottom_toTopOf="@+id/captureButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
 
     <Button
         android:id="@+id/captureButton"
@@ -48,8 +47,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
-        android:onClick="capture"/>
+        app:layout_constraintTop_toBottomOf="@+id/mTextView" />
 
     <android.support.constraint.Guideline
         android:id="@+id/guideline2"

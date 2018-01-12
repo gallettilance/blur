@@ -1,7 +1,5 @@
 package gallettilance.blur;
 
-import android.content.Intent;
-import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.hardware.Camera;
@@ -11,16 +9,15 @@ import android.support.v4.app.ActivityCompat;
 import android.content.pm.PackageManager;
 import android.Manifest;
 import android.graphics.Bitmap;
-import android.widget.ImageView;
+import android.graphics.BitmapFactory;
+import android.widget.TextView;
 import android.view.View;
-
 
 public class capture extends AppCompatActivity {
 
     private Camera mCamera = null;
     private CameraView mCameraView = null;
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-    private ImageView mImageView;
+    private TextView mTextView;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,35 +28,43 @@ public class capture extends AppCompatActivity {
         }
 
         try{
-            mCamera = Camera.open();//you can use open(int) to use different cameras
+            mCamera = Camera.open();
         } catch (Exception e){
             Log.d("ERROR", "Failed to get camera: " + e.getMessage());
         }
 
         if(mCamera != null) {
-            mCameraView = new CameraView(this, mCamera);//create a SurfaceView to show camera data
+            mCameraView = new CameraView(this, mCamera);
             FrameLayout camera_view = (FrameLayout)findViewById(R.id.camera_view);
-            camera_view.addView(mCameraView);//add the SurfaceView to the layout
-            mImageView = findViewById(R.id.mImageView);
-        }
-    }
-
-    public void capture(View v) {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            mImageView.setImageBitmap(imageBitmap);
+            camera_view.addView(mCameraView);
+            mTextView = findViewById(R.id.mTextView);
+            mTextView.setText("Hello!");
         }
 
-
+        findViewById(R.id.captureButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Take picture using the camera without preview.
+                mCamera.takePicture(null, null, mPictureCallback);
+            }
+        });
     }
+
+    Camera.PictureCallback mPictureCallback = new Camera.PictureCallback() {
+        public void onPictureTaken(byte[] data, Camera camera) {
+            // decode the data obtained by the camera into a Bitmap
+            Bitmap bitmapPicture = BitmapFactory.decodeByteArray(data, 0, data.length);
+            System.out.print(bitmapPicture);
+
+            if(mCamera != null) {
+                FrameLayout camera_view = (FrameLayout)findViewById(R.id.camera_view);
+                camera_view.removeAllViews();
+                camera_view.addView(mCameraView);
+                mTextView.setText("Picture Captured!");
+            } else {
+                mTextView.setText("Please try again...");
+            }
+        }
+    };
 
 }
