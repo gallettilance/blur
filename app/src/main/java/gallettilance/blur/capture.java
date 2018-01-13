@@ -56,11 +56,22 @@ public class capture extends AppCompatActivity {
             Bitmap bitmapPicture = BitmapFactory.decodeByteArray(data, 0, data.length);
             System.out.print(bitmapPicture);
 
+            String myUrl = "http://rest-blur.herokuapp.com/images";
+            String res;
+            HttpGETRequest getRequest = new HttpGETRequest();
+
+            try {
+                res = getRequest.execute(myUrl).get();
+            } catch(Exception e) {
+                res = e.toString();
+            }
+
             if(mCamera != null) {
                 FrameLayout camera_view = (FrameLayout)findViewById(R.id.camera_view);
                 camera_view.removeAllViews();
                 camera_view.addView(mCameraView);
-                mTextView.setText("Picture Captured!");
+                mTextView.setText(res);
+                // "Picture Captured!");
             } else {
                 mTextView.setText("Please try again...");
             }
