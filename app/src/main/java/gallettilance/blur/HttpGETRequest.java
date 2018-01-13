@@ -7,48 +7,25 @@ import java.net.URL;
 import java.lang.Exception;
 import android.os.AsyncTask;
 
-public class HttpGETRequest extends AsyncTask<String, Void, String> {
+import org.json.JSONObject;
 
-    public static final String REQUEST_METHOD = "GET";
-    public static final int READ_TIMEOUT = 10000;
-    public static final int CONNECTION_TIMEOUT = 10000;
+public class HttpGETRequest extends AsyncTask<String, Void, JSONObject> {
 
     @Override
-    protected String doInBackground(String... params){
+    protected JSONObject doInBackground(String... params){
 
         String stringUrl = params[0];
-        String result;
-        String inputLine;
 
+        JSONObject json;
         try {
-            URL myUrl = new URL(stringUrl);
-            HttpURLConnection connection =(HttpURLConnection)
-                    myUrl.openConnection();
-
-            connection.setRequestMethod(REQUEST_METHOD);
-            connection.setReadTimeout(READ_TIMEOUT);
-            connection.setConnectTimeout(CONNECTION_TIMEOUT);
-            connection.connect();
-
-            InputStreamReader streamReader = new
-                    InputStreamReader(connection.getInputStream());
-            BufferedReader reader = new BufferedReader(streamReader);
-            StringBuilder stringBuilder = new StringBuilder();
-            while((inputLine = reader.readLine()) != null){
-                stringBuilder.append(inputLine);
-            }
-            reader.close();
-            streamReader.close();
-            result = stringBuilder.toString();
-
+            json = JSONReader.readJsonFromUrl(stringUrl);
         } catch(Exception e) {
-            result = e.toString();
+            json = null;
         }
-
-        return result;
+        return json;
     }
 
-    protected void onPostExecute(String result){
+    protected void onPostExecute(JSONObject result){
         super.onPostExecute(result);
     }
 }
