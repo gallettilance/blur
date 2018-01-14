@@ -1,25 +1,29 @@
 package gallettilance.blur;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
+import javax.net.ssl.HttpsURLConnection;
+import java.net.URLEncoder;
 import java.net.URL;
 import java.io.OutputStream;
-import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.Iterator;
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
-import 	java.nio.charset.StandardCharsets;
 
-public class HttpPOSTRequest extends AsyncTask<String, Void, Void> {
+public class HttpPOSTRequest extends AsyncTask<String, Void, String> {
 
-    public static final String REQUEST_METHOD = "POST";
-    public static final int READ_TIMEOUT = 10000;
-    public static final int CONNECTION_TIMEOUT = 10000;
+    private static final String REQUEST_METHOD = "POST";
+    private static final int READ_TIMEOUT = 100000;
+    private static final int CONNECTION_TIMEOUT = 100000;
 
     @Override
-    protected Void doInBackground(String... params){
+    protected String doInBackground(String... params){
 
         String stringUrl = params[0];
         String img = params[1];
@@ -27,8 +31,6 @@ public class HttpPOSTRequest extends AsyncTask<String, Void, Void> {
         String img_type = params[3];
 
         JSONObject myjson = new JSONObject();
-
-        //OutputStream out;
 
         try {
             URL myUrl = new URL(stringUrl);
@@ -39,47 +41,74 @@ public class HttpPOSTRequest extends AsyncTask<String, Void, Void> {
             connection.setReadTimeout(READ_TIMEOUT);
             connection.setConnectTimeout(CONNECTION_TIMEOUT);
             connection.setDoOutput(true);
+            connection.setDoInput(true);
 
             myjson.put("img", img);
             myjson.put("img_label", img_label);
             myjson.put("img_type", img_type);
+            Log.e("MY PARAMETERS", myjson.toString());
 
-            //connection.addRequestProperty("Accept", "application/json; charset=UTF-8");
-            connection.addRequestProperty("Content-Type", "application/json");
+            OutputStream os = connection.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(
+                    new OutputStreamWriter(os, "UTF-8"));
+            writer.write(getPostDataString(myjson));
+            writer.flush();
+            writer.close();
+            os.close();
 
-            OutputStreamWriter wr = new OutputStreamWriter(connection.getOutputStream());
-            wr.write(myjson.toString());
-            wr.flush();
-            wr.close();
+            int responseCode=connection.getResponseCode();
 
-            //OutputStream os = connection.getOutputStream();
-            //os.write(myjson.toString().getBytes("UTF-8"));
-            //os.close();
+            if (responseCode == HttpsURLConnection.HTTP_OK | responseCode == HttpURLConnection.HTTP_OK) {
 
+                BufferedReader in=new BufferedReader(
+                        new InputStreamReader(
+                                connection.getInputStream()));
+                StringBuffer sb = new StringBuffer("");
+                String line = "";
 
-            //connection.setRequestProperty("img", img);
-            //connection.setRequestProperty("label", label);
+                while((line = in.readLine()) != null) {
+                    sb.append(line);
+                    break;
+                }
 
-            //out = new BufferedOutputStream(connection.getOutputStream());
+                in.close();
+                return sb.toString();
 
-            //BufferedWriter writer = new BufferedWriter (new OutputStreamWriter(out, "UTF-8"));
-
-
-            //out.flush();
-            //out.close();
-
-
-            //connection.addRequestProperty("img", img);
-            //connection.addRequestProperty("label", label);
-            //connection.connect();
-
-        } catch(Exception e) {
-            System.out.print(e);
+            }
+            else {
+                return "false : "+responseCode;
+            }
         }
-        return null;
+        catch(Exception e){
+            return "Exception: " + e.getMessage();
+        }
     }
 
-    protected void onPostExecute(Void result){
-        super.onPostExecute(result);
+    private String getPostDataString(JSONObject params) throws Exception {
+
+        StringBuilder result = new StringBuilder();
+        boolean first = true;
+        Iterator<String> itr = params.keys();
+
+        while(itr.hasNext()){
+
+            String key= itr.next();
+            Object value = params.get(key);
+
+            if (first)
+                first = false;
+            else
+                result.append("&");
+
+            result.append(URLEncoder.encode(key, "UTF-8"));
+            result.append("=");
+            result.append(URLEncoder.encode(value.toString(), "UTF-8"));
+        }
+        return result.toString();
+    }
+
+    @Override
+    protected void onPostExecute(String result) {
+        Log.e("Result", result);
     }
 }
