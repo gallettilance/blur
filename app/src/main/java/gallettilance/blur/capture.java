@@ -13,7 +13,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.widget.TextView;
 import android.view.View;
-import android.widget.ImageView;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -158,7 +157,7 @@ public class capture extends AppCompatActivity {
             }
             */
 
-            ImageView imageView ;
+            //ImageView imageView ;
 
             if(mCamera != null) {
                 try {
@@ -166,8 +165,8 @@ public class capture extends AppCompatActivity {
                     mTextView.setText("Picture Captured");
 
                     new AlertDialog.Builder(capture.this)
-                            .setTitle("Title")
-                            .setMessage("Do you want to try again?")
+                            .setTitle("SAVE IMAGE")
+                            .setMessage("Do you want to try again? (Cancel to save image to DB)")
                             .setIcon(android.R.drawable.ic_dialog_alert)
                             .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 

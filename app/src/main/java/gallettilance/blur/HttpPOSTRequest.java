@@ -19,8 +19,8 @@ import java.io.OutputStreamWriter;
 public class HttpPOSTRequest extends AsyncTask<String, Void, String> {
 
     private static final String REQUEST_METHOD = "POST";
-    private static final int READ_TIMEOUT = 100000;
-    private static final int CONNECTION_TIMEOUT = 100000;
+    private static final int READ_TIMEOUT = 1000000;
+    private static final int CONNECTION_TIMEOUT = 1000000;
 
     @Override
     protected String doInBackground(String... params){
@@ -60,20 +60,16 @@ public class HttpPOSTRequest extends AsyncTask<String, Void, String> {
 
             if (responseCode == HttpsURLConnection.HTTP_OK | responseCode == HttpURLConnection.HTTP_OK) {
 
-                BufferedReader in=new BufferedReader(
-                        new InputStreamReader(
-                                connection.getInputStream()));
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 StringBuffer sb = new StringBuffer("");
-                String line = "";
+                String line = in.readLine();
 
-                while((line = in.readLine()) != null) {
+                if (line != null) {
                     sb.append(line);
-                    break;
                 }
 
                 in.close();
                 return sb.toString();
-
             }
             else {
                 return "false : "+responseCode;
@@ -91,19 +87,21 @@ public class HttpPOSTRequest extends AsyncTask<String, Void, String> {
         Iterator<String> itr = params.keys();
 
         while(itr.hasNext()){
-
             String key= itr.next();
             Object value = params.get(key);
 
-            if (first)
+            if (first) {
                 first = false;
-            else
+            } else {
                 result.append("&");
+            }
 
             result.append(URLEncoder.encode(key, "UTF-8"));
             result.append("=");
             result.append(URLEncoder.encode(value.toString(), "UTF-8"));
         }
+
+        Log.d("result.toString()", result.toString());
         return result.toString();
     }
 
