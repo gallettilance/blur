@@ -5,6 +5,7 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
+import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import javax.net.ssl.HttpsURLConnection;
 import java.net.URLEncoder;
@@ -21,6 +22,7 @@ public class HttpPOSTRequest extends AsyncTask<String, Void, String> {
     private static final String REQUEST_METHOD = "POST";
     private static final int READ_TIMEOUT = 1000000;
     private static final int CONNECTION_TIMEOUT = 1000000;
+    private final String USER_AGENT = "Chrome/63.0.3239.132";
 
     @Override
     protected String doInBackground(String... params){
@@ -34,48 +36,70 @@ public class HttpPOSTRequest extends AsyncTask<String, Void, String> {
 
         try {
             URL myUrl = new URL(stringUrl);
-            HttpURLConnection connection =(HttpURLConnection)
+            HttpsURLConnection connection =(HttpsURLConnection)
                     myUrl.openConnection();
 
             connection.setRequestMethod(REQUEST_METHOD);
             connection.setReadTimeout(READ_TIMEOUT);
             connection.setConnectTimeout(CONNECTION_TIMEOUT);
+            connection.setRequestProperty("User-Agent", USER_AGENT);
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Accept", "application/json");
             connection.setDoOutput(true);
             connection.setDoInput(true);
+            connection.connect();
 
-            myjson.put("img", img);
             myjson.put("img_label", img_label);
             myjson.put("img_type", img_type);
+            myjson.put("img", img);
             Log.e("MY PARAMETERS", myjson.toString());
 
-            OutputStream os = connection.getOutputStream();
-            BufferedWriter writer = new BufferedWriter(
-                    new OutputStreamWriter(os, "UTF-8"));
-            writer.write(getPostDataString(myjson));
-            writer.flush();
-            writer.close();
+            DataOutputStream os = new DataOutputStream(connection.getOutputStream());
+            os.writeBytes(getPostDataString(myjson));
+            os.flush();
             os.close();
 
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(connection.getInputStream()));
+            String inputLine;
+            StringBuffer response = new StringBuffer();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            }
+            in.close();
+
+            Log.d("ResponseCode", Integer.toString(connection.getResponseCode()));
+            Log.d("ReponseMessage", connection.getResponseMessage());
+            Log.d("Response", response.toString());
+
+            connection.disconnect();
+            return response.toString();
+            /*
             int responseCode=connection.getResponseCode();
 
             if (responseCode == HttpsURLConnection.HTTP_OK | responseCode == HttpURLConnection.HTTP_OK) {
 
                 BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 StringBuffer sb = new StringBuffer("");
-                String line = in.readLine();
+                String line = "";
 
-                if (line != null) {
+                if ((line = in.readLine()) != null) {
                     sb.append(line);
                 }
 
                 in.close();
+                connection.disconnect();
                 return sb.toString();
-            }
-            else {
+            } else {
+                connection.disconnect();
                 return "false : "+responseCode;
             }
+            */
+
         }
-        catch(Exception e){
+
+        catch(Exception e) {
             return "Exception: " + e.getMessage();
         }
     }

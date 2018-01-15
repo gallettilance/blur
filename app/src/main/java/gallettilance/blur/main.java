@@ -13,8 +13,18 @@ public class main extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
-    public void cameraAccess(View view) {
-        Intent intent = new Intent(main.this, capture.class);
+    public void cameraAccess_digit(View view) {
+        Intent intent = new Intent(main.this, capture.class).putExtra("text", "Take picture of Digit");
+        startActivity(intent);
+    }
+
+    public void cameraAccess_letter(View view) {
+        Intent intent = new Intent(main.this, capture.class).putExtra("text", "Take picture of Letter");
+        startActivity(intent);
+    }
+
+    public void cameraAccess_word(View view) {
+        Intent intent = new Intent(main.this, capture.class).putExtra("text", "Take picture of Word");
         startActivity(intent);
     }
 }

@@ -18,7 +18,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:onClick="cameraAccess"/>
+        android:onClick="cameraAccess_digit"/>
 
     <Button
         android:id="@+id/letter"
@@ -32,7 +32,7 @@
         app:layout_constraintStart_toEndOf="@+id/guideline"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/digit"
-        android:onClick="cameraAccess" />
+        android:onClick="cameraAccess_letter" />
 
     <Button
         android:id="@+id/word"
@@ -45,7 +45,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/letter"
-        android:onClick="cameraAccess" />
+        android:onClick="cameraAccess_word" />
 
     <android.support.constraint.Guideline
         android:id="@+id/guideline"
