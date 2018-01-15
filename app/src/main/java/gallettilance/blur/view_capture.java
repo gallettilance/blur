@@ -24,7 +24,7 @@ public class view_capture extends AppCompatActivity {
         setContentView(R.layout.activity_view_capture);
         Intent intent = getIntent();
         final Bitmap bitmapPicture = intent.getParcelableExtra("BitmapImage");
-        final double[][] inputIMG = new double[28][28];
+        final double[][] inputIMG = new double[1][28 * 28];
 
         image_view = findViewById(R.id.image_view);
         image_view.setImageBitmap(bitmapPicture);
@@ -46,7 +46,7 @@ public class view_capture extends AppCompatActivity {
 
                         DecimalFormat df = new DecimalFormat("#.##");
                         double myRGB = Double.valueOf(df.format((red + green + blue)/3.0));
-                        inputIMG[i][j] = myRGB;
+                        inputIMG[0][i*bitmapPicture.getWidth() + j] = (.99 * myRGB / 255.0) + .01;
 
                         img.append(df.format((.99 * myRGB / 255.0) + .01));
                         img.append(',');

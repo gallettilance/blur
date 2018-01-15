@@ -73,8 +73,10 @@ public class NeuralNetwork {
         double[][] hidden_input = myNumpy.matmul(this.weights_input_hidden, input_list);
         double[][] hidden_output = myNumpy.activate(hidden_input, this);
 
-        double[][] final_input = myNumpy.matmul(this.weights_hidden_output, hidden_output);
+        double[][] final_input = myNumpy.matmul(this.weights_hidden_output, myNumpy.transpose(hidden_output));
         double[][] final_output = myNumpy.activate(final_input, this);
+
+        Log.d("query output", final_output.toString());
 
         return final_output;
     }
@@ -82,7 +84,7 @@ public class NeuralNetwork {
     public NeuralNetwork initializeFromAPI() {
         JSONObject json;
         HttpGETRequest getRequest = new HttpGETRequest();
-        String myUrl = "https://rest-blur.herokuapp.com/model/digits";
+        String myUrl = "https://rest-blur.herokuapp.com/model_digits";
         try {
             json = getRequest.execute(myUrl).get();
         } catch (Exception e) {
@@ -91,38 +93,44 @@ public class NeuralNetwork {
 
         if (json != null) {
 
-            String wih;
-            String who;
-            double[][] model_wih;
-            double[][] model_who;
+            String[] wih;
+            String[] who;
 
             try {
-                wih = json.get("model_wih").toString();
-                who = json.get("model_who").toString();
+                wih = json.get("model_wih").toString().split(",");
+                who = json.get("model_who").toString().split(",");
 
                 this.input_layer = Integer.parseInt(json.get("model_input_layer").toString());
                 this.hidden_layer = Integer.parseInt(json.get("model_hidden_layer").toString());
                 this.output_layer = Integer.parseInt(json.get("model_output_layer").toString());
 
-                model_wih = new double[this.input_layer][this.hidden_layer];
-                model_who = new double[this.hidden_layer][this.output_layer];
+                this.weights_input_hidden = new double[this.input_layer][this.hidden_layer];
+                this.weights_hidden_output = new double[this.hidden_layer][this.output_layer];
 
-                for (int i = 0; i < wih.length(); i++) {
-                    char c = wih.charAt(i);
-                    if (c != ',') {
-                        model_wih[i / this.hidden_layer][i % this.input_layer] = Character.getNumericValue(c);
+                Log.d("wih length", Integer.toString(wih.length - 1));
+                Log.d("who length", Integer.toString(who.length - 1));
+
+                Log.d("input_layer", Integer.toString(this.input_layer));
+                Log.d("hidden_layer", Integer.toString(this.hidden_layer));
+                Log.d("output_layer", Integer.toString(this.output_layer));
+
+                for (int i = 0; i < wih.length - 1; i++) {
+                    String c = wih[i];
+                    try {
+                        this.weights_input_hidden[i / this.input_layer][i % this.hidden_layer] = Double.valueOf(c);
+                    } catch(Exception e) {
+                        Log.d("Error", e.toString()+" at wih["+Integer.toString(i)+"]");
                     }
                 }
 
-                for (int i = 0; i < who.length(); i++) {
-                    char c = who.charAt(i);
-                    if (c != ',') {
-                        model_who[i / this.output_layer][i % this.hidden_layer] = Character.getNumericValue(c);
+                for (int i = 0; i < who.length - 1; i++) {
+                    String c = who[i];
+                    try {
+                        this.weights_hidden_output[i / this.hidden_layer][i % this.output_layer] = Double.valueOf(c);
+                    } catch(Exception e) {
+                        Log.d("Error", e.toString()+" at wih["+Integer.toString(i)+"]");
                     }
                 }
-
-                this.weights_input_hidden = model_wih;
-                this.weights_hidden_output = model_who;
 
             } catch (Exception e) {
                 Log.d("Error", e.toString());

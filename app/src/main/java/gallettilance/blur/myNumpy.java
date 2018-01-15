@@ -1,5 +1,7 @@
 package gallettilance.blur;
 
+import android.util.Log;
+
 public class myNumpy {
 
     public static double dot(double[] a, double[] b) {
@@ -18,31 +20,51 @@ public class myNumpy {
     public static double[][] matmul(double[][] A, double[][] B) {
 
         int aRows = A.length;
-        int aColumns = A[0].length;
-        int bRows = B.length;
-        int bColumns = B[0].length;
+        Log.d("aRows", Integer.toString(aRows));
 
-        if (aColumns != bRows) {
-            throw new IllegalArgumentException("A:Rows: " + aColumns + " did not match B:Columns " + bRows + ".");
+        int bRows = B.length;
+        Log.d("bRows", Integer.toString(bRows));
+
+        int aColumns = A[0].length;
+        Log.d("aColumns", Integer.toString(aColumns));
+
+        int bColumns = B[0].length;
+        Log.d("bColumns", Integer.toString(bColumns));
+
+        if (aRows != bColumns) {
+            throw new IllegalArgumentException("A:Rows: " + aRows + " did not match B:Columns " + bColumns + ".");
         }
 
-        double[][] result = new double[aRows][bColumns];
+        double[][] result = new double[aColumns][bRows];
 
-        for (int i = 0; i < aRows; i++) {
-            for (int j = 0; j < bColumns; j++) {
+        for (int i = 0; i < aColumns; i++) {
+            for (int j = 0; j < bRows; j++) {
                 result[i][j] = 0.0;
             }
         }
 
-        for (int i = 0; i < aRows; i++) {
-            for (int j = 0; j < bColumns; j++) {
-                for (int k = 0; k < aColumns; k++) {
-                    result[i][j] += A[i][k] * B[k][j];
+        for (int i = 0; i < aColumns; i++) {
+            for (int j = 0; j < bRows; j++) {
+                for (int k = 0; k < aRows; k++) {
+                    result[i][j] += A[k][i] * B[j][k];
                 }
             }
         }
 
         return result;
+    }
+
+    public static double[][] transpose(double[][] A) {
+        double[][] res = new double[A[0].length][A.length];
+
+        for(int i=0; i < A.length; i++){
+            for(int j=0; j < A[i].length; j++){
+                res[j][i] = A[i][j];
+            }
+        }
+
+        return res;
+
     }
 
     public static double[][] activate(double[][] A, NeuralNetwork NN) {
