@@ -8,6 +8,8 @@ import android.graphics.Bitmap;
 import android.widget.ImageView;
 import android.view.View;
 import android.graphics.Color;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 
 import java.text.DecimalFormat;
 import java.lang.Integer;
@@ -22,6 +24,8 @@ public class view_capture extends AppCompatActivity {
         setContentView(R.layout.activity_view_capture);
         Intent intent = getIntent();
         final Bitmap bitmapPicture = intent.getParcelableExtra("BitmapImage");
+        final double[][] inputIMG = new double[28][28];
+
         image_view = findViewById(R.id.image_view);
         image_view.setImageBitmap(bitmapPicture);
 
@@ -29,7 +33,7 @@ public class view_capture extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                StringBuilder img = new StringBuilder(bitmapPicture.getWidth() * bitmapPicture.getHeight());
+                final StringBuilder img = new StringBuilder(bitmapPicture.getWidth() * bitmapPicture.getHeight());
 
                 for(int i=0; i < bitmapPicture.getWidth(); i++)
                 {
@@ -42,29 +46,60 @@ public class view_capture extends AppCompatActivity {
 
                         DecimalFormat df = new DecimalFormat("#.##");
                         double myRGB = Double.valueOf(df.format((red + green + blue)/3.0));
-                        img.append(Double.toString(Double.valueOf(df.format((.99 * myRGB / 255.0) + .01))));
+                        inputIMG[i][j] = myRGB;
+
+                        img.append(df.format((.99 * myRGB / 255.0) + .01));
                         img.append(',');
                     }
                 }
 
-                Log.d("Image width", Integer.toString(bitmapPicture.getWidth()));
-                Log.d("Image height", Integer.toString(bitmapPicture.getHeight()));
-                Log.d("Image", img.toString());
+                int mypred = -1;
+                double[][] pred;
 
-                String img_label = "0";
-                String img_type = "digit";
+                NeuralNetwork myNN = new NeuralNetwork(0,0,0,0);
+                myNN.initializeFromAPI();
 
-                String myUrl = "https://rest-blur.herokuapp.com/images/";
-                HttpPOSTRequest postRequest = new HttpPOSTRequest();
+                pred = myNN.query(inputIMG);
 
-                try {
-                    postRequest.execute(myUrl, img.toString(), img_label, img_type);
-                } catch(Exception e) {
-                    Log.d("Error", e.toString());
+                for (int i=0; i < pred[0].length; i++) {
+                    if (pred[0][i] > .9) {
+                        mypred = i;
+                    }
                 }
 
-                Intent intent = new Intent(view_capture.this, capture.class).putExtra("text", "Sent to DB");
-                startActivity(intent);
+                final int myprediction = mypred;
+
+                new AlertDialog.Builder(view_capture.this)
+                        .setTitle("Prediction")
+                        .setMessage(Integer.toString(myprediction))
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                String img_label = Integer.toString(myprediction);
+                                String img_type = "digit";
+
+                                String myUrl = "https://rest-blur.herokuapp.com/images/";
+                                HttpPOSTRequest postRequest = new HttpPOSTRequest();
+
+                                try {
+                                    postRequest.execute(myUrl, img.toString(), img_label, img_type);
+                                } catch(Exception e) {
+                                    Log.d("Error", e.toString());
+                                }
+
+                                Intent intent = new Intent(view_capture.this, capture.class).putExtra("text", "Sent to DB");
+                                startActivity(intent);
+
+                            }})
+                        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                //ask for user input
+                                Intent intent = new Intent(view_capture.this, capture.class).putExtra("text", "Not Sent");
+                                startActivity(intent);
+                            }}).show();
+
 
             }
         });

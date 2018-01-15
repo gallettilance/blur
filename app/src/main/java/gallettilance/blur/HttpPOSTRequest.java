@@ -4,25 +4,17 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import org.json.JSONObject;
-
-import java.io.DataOutputStream;
-import java.net.HttpURLConnection;
 import javax.net.ssl.HttpsURLConnection;
-import java.net.URLEncoder;
 import java.net.URL;
-import java.io.OutputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Iterator;
-import java.io.BufferedWriter;
-import java.io.OutputStreamWriter;
 
 public class HttpPOSTRequest extends AsyncTask<String, Void, String> {
 
     private static final String REQUEST_METHOD = "POST";
     private static final int READ_TIMEOUT = 1000000;
     private static final int CONNECTION_TIMEOUT = 1000000;
-    private final String USER_AGENT = "Chrome/63.0.3239.132";
 
     @Override
     protected String doInBackground(String... params){
@@ -35,29 +27,23 @@ public class HttpPOSTRequest extends AsyncTask<String, Void, String> {
         JSONObject myjson = new JSONObject();
 
         try {
-            URL myUrl = new URL(stringUrl);
+            myjson.put("img_label", img_label);
+            myjson.put("img_type", img_type);
+            myjson.put("img", img);
+            Log.e("MY PARAMETERS", myjson.toString());
+
+            URL myUrl = new URL(stringUrl+getPostDataString(myjson));
             HttpsURLConnection connection =(HttpsURLConnection)
                     myUrl.openConnection();
 
             connection.setRequestMethod(REQUEST_METHOD);
             connection.setReadTimeout(READ_TIMEOUT);
             connection.setConnectTimeout(CONNECTION_TIMEOUT);
-            connection.setRequestProperty("User-Agent", USER_AGENT);
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestProperty("Accept", "application/json");
             connection.setDoOutput(true);
             connection.setDoInput(true);
             connection.connect();
-
-            myjson.put("img_label", img_label);
-            myjson.put("img_type", img_type);
-            myjson.put("img", img);
-            Log.e("MY PARAMETERS", myjson.toString());
-
-            DataOutputStream os = new DataOutputStream(connection.getOutputStream());
-            os.writeBytes(getPostDataString(myjson));
-            os.flush();
-            os.close();
 
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(connection.getInputStream()));
@@ -70,33 +56,11 @@ public class HttpPOSTRequest extends AsyncTask<String, Void, String> {
             in.close();
 
             Log.d("ResponseCode", Integer.toString(connection.getResponseCode()));
-            Log.d("ReponseMessage", connection.getResponseMessage());
+            Log.d("ResponseMessage", connection.getResponseMessage());
             Log.d("Response", response.toString());
 
             connection.disconnect();
             return response.toString();
-            /*
-            int responseCode=connection.getResponseCode();
-
-            if (responseCode == HttpsURLConnection.HTTP_OK | responseCode == HttpURLConnection.HTTP_OK) {
-
-                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuffer sb = new StringBuffer("");
-                String line = "";
-
-                if ((line = in.readLine()) != null) {
-                    sb.append(line);
-                }
-
-                in.close();
-                connection.disconnect();
-                return sb.toString();
-            } else {
-                connection.disconnect();
-                return "false : "+responseCode;
-            }
-            */
-
         }
 
         catch(Exception e) {
@@ -116,13 +80,14 @@ public class HttpPOSTRequest extends AsyncTask<String, Void, String> {
 
             if (first) {
                 first = false;
+                result.append("?");
             } else {
                 result.append("&");
             }
 
-            result.append(URLEncoder.encode(key, "UTF-8"));
+            result.append(key);
             result.append("=");
-            result.append(URLEncoder.encode(value.toString(), "UTF-8"));
+            result.append(value.toString());
         }
 
         Log.d("result.toString()", result.toString());
