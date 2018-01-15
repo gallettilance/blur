@@ -54,7 +54,7 @@ public class view_capture extends AppCompatActivity {
                 String img_label = "0";
                 String img_type = "digit";
 
-                String myUrl = "https://rest-blur.herokuapp.com/images";
+                String myUrl = "https://rest-blur.herokuapp.com/images/";
                 HttpPOSTRequest postRequest = new HttpPOSTRequest();
 
                 try {
