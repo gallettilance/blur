@@ -10,6 +10,7 @@ import android.view.View;
 import android.graphics.Color;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.widget.EditText;
 
 import java.text.DecimalFormat;
 import java.lang.Integer;
@@ -96,8 +97,42 @@ public class view_capture extends AppCompatActivity {
 
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 //ask for user input
-                                Intent intent = new Intent(view_capture.this, capture.class).putExtra("text", "Not Sent");
-                                startActivity(intent);
+                                AlertDialog.Builder alert = new AlertDialog.Builder(view_capture.this);
+
+                                alert.setTitle("What digit was it? (0-9)");
+
+                                final EditText input = new EditText(view_capture.this);
+                                alert.setView(input);
+
+                                alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+
+                                        String img_label = input.getText().toString();
+                                        String img_type = "digit";
+
+                                        String myUrl = "https://rest-blur.herokuapp.com/images/";
+                                        HttpPOSTRequest postRequest = new HttpPOSTRequest();
+
+                                        try {
+                                            postRequest.execute(myUrl, img.toString(), img_label, img_type);
+                                        } catch(Exception e) {
+                                            Log.d("Error", e.toString());
+                                        }
+
+                                        Intent intent = new Intent(view_capture.this, capture.class).putExtra("text", "Sent to DB - Thank you!");
+                                        startActivity(intent);
+                                    }
+                                });
+
+                                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        Intent intent = new Intent(view_capture.this, capture.class).putExtra("text", "Not Sent");
+                                        startActivity(intent);
+                                    }
+                                });
+
+                                alert.show();
+
                             }}).show();
 
             }

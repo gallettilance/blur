@@ -83,6 +83,58 @@ public class NeuralNetwork {
         return final_output;
     }
 
+
+    public void train(double[][] input_list, double[][] target_list) {
+
+        double[][] hidden_inputs = myNumpy.matmul(this.weights_input_hidden, input_list);
+        double[][] hidden_outputs = myNumpy.activate(hidden_inputs, this);
+
+        double[][] final_inputs = myNumpy.matmul(this.weights_hidden_output, hidden_outputs);
+        double[][] final_outputs = myNumpy.activate(final_inputs, this);
+
+        double[][] output_error = new double[target_list.length][target_list[0].length];
+
+        for (int i=0; i < output_error.length; i++) {
+            for (int j=0; j < output_error[i].length; j++) {
+                output_error[i][j] = target_list[i][j] - input_list[i][j];
+            }
+        }
+
+        double[][] hidden_error = myNumpy.matmul(myNumpy.transpose(this.weights_hidden_output), output_error);
+
+        double[][] output_temp = new double[output_error.length][output_error[0].length];
+        double[][] hidden_temp = new double[hidden_error.length][hidden_error[0].length];
+
+        for (int i=0; i < output_temp.length; i++) {
+            for (int j=0; j < output_temp[i].length; j++) {
+                output_temp[i][j] = output_error[i][j] * final_outputs[i][j] * (1.0 - final_outputs[i][j]);
+            }
+        }
+
+        double[][] diff_who = myNumpy.matmul(output_temp, myNumpy.transpose(hidden_outputs));
+
+        for (int i=0; i < this.weights_hidden_output.length; i++) {
+            for (int j = 0; j < this.weights_hidden_output[i].length; j++) {
+                this.weights_hidden_output[i][j] += this.learning_rate * diff_who[i][j];
+            }
+        }
+
+        for (int i=0; i < hidden_temp.length; i++) {
+            for (int j=0; j < hidden_temp[i].length; j++) {
+                hidden_temp[i][j] = hidden_error[i][j] * hidden_outputs[i][j] * (1.0 - hidden_outputs[i][j]);
+            }
+        }
+
+        double[][] diff_wih = myNumpy.matmul(hidden_temp, myNumpy.transpose(input_list));
+
+        for (int i=0; i < this.weights_input_hidden.length; i++) {
+            for (int j = 0; j < this.weights_input_hidden[i].length; j++) {
+                this.weights_input_hidden[i][j] += this.learning_rate * diff_wih[i][j];
+            }
+        }
+    }
+
+
     public NeuralNetwork initializeFromAPI() {
         JSONObject json;
         HttpGETRequest getRequest = new HttpGETRequest();
@@ -108,14 +160,6 @@ public class NeuralNetwork {
 
                 this.weights_input_hidden = new double[this.input_layer][this.hidden_layer];
                 this.weights_hidden_output = new double[this.hidden_layer][this.output_layer];
-                /*
-                Log.d("wih length", Integer.toString(wih.length - 1));
-                Log.d("who length", Integer.toString(who.length - 1));
-
-                Log.d("input_layer", Integer.toString(this.input_layer));
-                Log.d("hidden_layer", Integer.toString(this.hidden_layer));
-                Log.d("output_layer", Integer.toString(this.output_layer));
-                */
 
                 int row = 0;
                 int col = 0;
