@@ -76,7 +76,9 @@ public class NeuralNetwork {
         double[][] final_input = myNumpy.matmul(this.weights_hidden_output, myNumpy.transpose(hidden_output));
         double[][] final_output = myNumpy.activate(final_input, this);
 
-        Log.d("query output", final_output.toString());
+        for (int i=0; i < final_output.length; i++) {
+            Log.d("final_output["+Integer.toString(i)+"][0]", Double.toString(final_output[i][0]));
+        }
 
         return final_output;
     }
@@ -106,29 +108,58 @@ public class NeuralNetwork {
 
                 this.weights_input_hidden = new double[this.input_layer][this.hidden_layer];
                 this.weights_hidden_output = new double[this.hidden_layer][this.output_layer];
-
+                /*
                 Log.d("wih length", Integer.toString(wih.length - 1));
                 Log.d("who length", Integer.toString(who.length - 1));
 
                 Log.d("input_layer", Integer.toString(this.input_layer));
                 Log.d("hidden_layer", Integer.toString(this.hidden_layer));
                 Log.d("output_layer", Integer.toString(this.output_layer));
+                */
+
+                int row = 0;
+                int col = 0;
 
                 for (int i = 0; i < wih.length - 1; i++) {
-                    String c = wih[i];
+                    String c = wih[i].replace("{", "").replace("}", "").replace("\"", "");
+
                     try {
-                        this.weights_input_hidden[i / this.input_layer][i % this.hidden_layer] = Double.valueOf(c);
+                        if (i % this.hidden_layer == 0) {
+                            row += 1;
+                        }
+
+                        this.weights_input_hidden[row - 1][col] = Double.valueOf(c);
+
+                        if (col == this.hidden_layer - 1) {
+                            col = 0;
+                        } else {
+                            col += 1;
+                        }
+
                     } catch(Exception e) {
-                        Log.d("Error", e.toString()+" at wih["+Integer.toString(i)+"]");
+                        Log.d("Error", e.toString()+" at wih["+Integer.toString(i / this.hidden_layer)+"]["+Integer.toString(i % this.input_layer)+"]");
                     }
                 }
 
+                row = 0;
+                col = 0;
+
                 for (int i = 0; i < who.length - 1; i++) {
-                    String c = who[i];
+                    String c = who[i].replace("{", "").replace("}", "").replace("\"", "");
                     try {
-                        this.weights_hidden_output[i / this.hidden_layer][i % this.output_layer] = Double.valueOf(c);
+                        if (i % this.output_layer == 0) {
+                            row += 1;
+                        }
+
+                        this.weights_hidden_output[row - 1][col] = Double.valueOf(c);
+
+                        if (col == this.output_layer - 1) {
+                            col = 0;
+                        } else {
+                            col += 1;
+                        }
                     } catch(Exception e) {
-                        Log.d("Error", e.toString()+" at wih["+Integer.toString(i)+"]");
+                        Log.d("Error", e.toString()+" at who["+Integer.toString(i / this.output_layer)+"]["+Integer.toString(i % this.hidden_layer)+"]");
                     }
                 }
 

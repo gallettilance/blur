@@ -53,21 +53,21 @@ public class view_capture extends AppCompatActivity {
                     }
                 }
 
-                int mypred = -1;
                 double[][] pred;
 
                 NeuralNetwork myNN = new NeuralNetwork(0,0,0,0);
                 myNN.initializeFromAPI();
 
                 pred = myNN.query(inputIMG);
+                int max = 0;
 
-                for (int i=0; i < pred[0].length; i++) {
-                    if (pred[0][i] > .9) {
-                        mypred = i;
+                for (int i=0; i < pred.length; i++) {
+                    if (pred[i][0] > pred[max][0]) {
+                        max = i;
                     }
                 }
 
-                final int myprediction = mypred;
+                final int myprediction = max;
 
                 new AlertDialog.Builder(view_capture.this)
                         .setTitle("Prediction")
@@ -99,7 +99,6 @@ public class view_capture extends AppCompatActivity {
                                 Intent intent = new Intent(view_capture.this, capture.class).putExtra("text", "Not Sent");
                                 startActivity(intent);
                             }}).show();
-
 
             }
         });

@@ -20,16 +20,16 @@ public class myNumpy {
     public static double[][] matmul(double[][] A, double[][] B) {
 
         int aRows = A.length;
-        Log.d("aRows", Integer.toString(aRows));
+        //Log.d("aRows", Integer.toString(aRows));
 
         int bRows = B.length;
-        Log.d("bRows", Integer.toString(bRows));
+        //Log.d("bRows", Integer.toString(bRows));
 
         int aColumns = A[0].length;
-        Log.d("aColumns", Integer.toString(aColumns));
+        //Log.d("aColumns", Integer.toString(aColumns));
 
         int bColumns = B[0].length;
-        Log.d("bColumns", Integer.toString(bColumns));
+        //Log.d("bColumns", Integer.toString(bColumns));
 
         if (aRows != bColumns) {
             throw new IllegalArgumentException("A:Rows: " + aRows + " did not match B:Columns " + bColumns + ".");
