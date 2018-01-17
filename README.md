@@ -10,15 +10,19 @@ Selecting digits, we can point the camera and capture a picture of the digit we 
 
 <img src="https://github.com/galletti94/blur/blob/master/screenshots/capture.png" height=20% width=20%/>
 
-We can then check if the digit is well captured and either try again or make a prediction
+The app processes the image to be ready for prediction. We can check if the digit is well captured and processed and either try again or make a prediction
 
 <img src="https://github.com/galletti94/blur/blob/master/screenshots/check.png" height=20% width=20%/>
 
-Predicting gives a good result! Pressing OK sends to the database, CANCEL just returns to the camera view.
+Pressing CORRECT sends to the database and returns to main screen, INCORRECT gives the option to improve our model by submitting feedback.
 
 <img src="https://github.com/galletti94/blur/blob/master/screenshots/predict.png" height=20% width=20%/>
 
-If the prediction were incorrect and somehow the user figured out what the digit was, the user can input this information and send the labeled image to the database.
+The following is the feedback screen. The user can choose whether or not to send the feedback.
+
+<img src="https://github.com/galletti94/blur/blob/master/screenshots/feedback.png" height=20% width=20%/>
+
+Great!
 
 <img src="https://github.com/galletti94/blur/blob/master/screenshots/happy.png" height=20% width=20%/>
 
