@@ -112,17 +112,31 @@ public class capture extends AppCompatActivity {
     Camera.PictureCallback mPictureCallback = new Camera.PictureCallback() {
         public void onPictureTaken(byte[] data, Camera camera) {
             try {
-                final Bitmap bitmapPicture = processImage(data);
-                Intent intent = new Intent(capture.this, view_capture.class).putExtra("BitmapImage", bitmapPicture);
-                startActivity(intent);
-            } catch (Exception e) {
+                String type;
+                Intent myintent = getIntent();
+                type = myintent.getExtras().getString("type");
+                try {
+                    final Bitmap bitmapPicture = processImage(data);
+                    Intent intent = new Intent(capture.this, view_capture.class).putExtra("BitmapImage", bitmapPicture).putExtra("type", type);
+                    startActivity(intent);
+                } catch (Exception e) {
+                    Log.d("Error", e.toString());
+                    FrameLayout camera_view = (FrameLayout) findViewById(R.id.camera_view);
+                    camera_view.removeAllViews();
+                    camera_view.addView(mCameraView);
+                    mTextView.setText("Please try again...");
+                }
+            } catch(Exception e) {
                 Log.d("Error", e.toString());
-                FrameLayout camera_view = (FrameLayout) findViewById(R.id.camera_view);
-                camera_view.removeAllViews();
-                camera_view.addView(mCameraView);
-                mTextView.setText("Please try again...");
             }
         }
     };
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(capture.this, main.class);
+        startActivity(intent);
+    }
+
 }
 

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -12,13 +13,13 @@
         android:layout_width="241dp"
         android:layout_height="39dp"
         android:background="@android:color/holo_orange_light"
+        android:onClick="cameraAccess_digit"
         android:text="Digit"
         app:layout_constraintBottom_toTopOf="@+id/letter"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:onClick="cameraAccess_digit"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/letter"

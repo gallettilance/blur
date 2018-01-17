@@ -135,10 +135,22 @@ public class NeuralNetwork {
     }
 
 
-    public NeuralNetwork initializeFromAPI() {
+    public NeuralNetwork initializeFromAPI(String type) {
+
         JSONObject json;
         HttpGETRequest getRequest = new HttpGETRequest();
-        String myUrl = "https://rest-blur.herokuapp.com/model_digits";
+        String myUrl;
+
+        if (type.equals("digit")) {
+            myUrl = "https://rest-blur.herokuapp.com/model_digits";
+        } else {
+            if (type.equals("letter")) {
+                myUrl = "https://rest-blur.herokuapp.com/model_letters";
+            } else {
+                myUrl = "https://rest-blur.herokuapp.com/model_words";
+            }
+        }
+
         try {
             json = getRequest.execute(myUrl).get();
         } catch (Exception e) {

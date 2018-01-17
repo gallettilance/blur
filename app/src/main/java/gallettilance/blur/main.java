@@ -14,17 +14,17 @@ public class main extends AppCompatActivity {
     }
 
     public void cameraAccess_digit(View view) {
-        Intent intent = new Intent(main.this, capture.class).putExtra("text", "Take picture of Digit");
+        Intent intent = new Intent(main.this, capture.class).putExtra("text", "Take picture of Digit").putExtra("type", "digit");
         startActivity(intent);
     }
 
     public void cameraAccess_letter(View view) {
-        Intent intent = new Intent(main.this, capture.class).putExtra("text", "Take picture of Letter");
+        Intent intent = new Intent(main.this, capture.class).putExtra("text", "Take picture of Letter").putExtra("type", "letter");
         startActivity(intent);
     }
 
     public void cameraAccess_word(View view) {
-        Intent intent = new Intent(main.this, capture.class).putExtra("text", "Take picture of Word");
+        Intent intent = new Intent(main.this, capture.class).putExtra("text", "Take picture of Word").putExtra("type", "word");
         startActivity(intent);
     }
 }

@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.widget.EditText;
+import android.text.InputFilter;
 
 import java.text.DecimalFormat;
 import java.lang.Integer;
@@ -34,106 +35,143 @@ public class view_capture extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                final StringBuilder img = new StringBuilder(bitmapPicture.getWidth() * bitmapPicture.getHeight());
+                Intent intent = getIntent();
+                final String type;
 
-                for(int i=0; i < bitmapPicture.getWidth(); i++)
-                {
-                    for(int j=0; j < bitmapPicture.getHeight(); j++)
-                    {
-                        int colour = bitmapPicture.getPixel(i, j);
-                        int red = Color.red(colour);
-                        int blue = Color.blue(colour);
-                        int green = Color.green(colour);
+                try {
+                    type = intent.getExtras().getString("type");
 
-                        DecimalFormat df = new DecimalFormat("#.##");
-                        double myRGB = Double.valueOf(df.format((red + green + blue)/3.0));
-                        inputIMG[0][i*bitmapPicture.getWidth() + j] = (.99 * myRGB / 255.0) + .01;
+                    final StringBuilder img = new StringBuilder(bitmapPicture.getWidth() * bitmapPicture.getHeight());
 
-                        img.append(df.format((.99 * myRGB / 255.0) + .01));
-                        img.append(',');
+                    for (int i = 0; i < bitmapPicture.getWidth(); i++) {
+                        for (int j = 0; j < bitmapPicture.getHeight(); j++) {
+                            int colour = bitmapPicture.getPixel(i, j);
+                            int red = Color.red(colour);
+                            int blue = Color.blue(colour);
+                            int green = Color.green(colour);
+
+                            DecimalFormat df = new DecimalFormat("#.##");
+                            double myRGB = Double.valueOf(df.format((red + green + blue) / 3.0));
+                            inputIMG[0][i * bitmapPicture.getWidth() + j] = (.99 * myRGB / 255.0) + .01;
+
+                            img.append(df.format((.99 * myRGB / 255.0) + .01));
+                            img.append(',');
+                        }
                     }
-                }
 
-                double[][] pred;
+                    double[][] pred;
 
-                NeuralNetwork myNN = new NeuralNetwork(0,0,0,0);
-                myNN.initializeFromAPI();
+                    NeuralNetwork myNN = new NeuralNetwork(0, 0, 0, 0);
+                    myNN.initializeFromAPI(type);
 
-                pred = myNN.query(inputIMG);
-                int max = 0;
+                    pred = myNN.query(inputIMG);
+                    int max = 0;
 
-                for (int i=0; i < pred.length; i++) {
-                    if (pred[i][0] > pred[max][0]) {
-                        max = i;
+                    for (int i = 0; i < pred.length; i++) {
+                        if (pred[i][0] > pred[max][0]) {
+                            max = i;
+                        }
                     }
-                }
 
-                final int myprediction = max;
+                    final int myprediction = max;
 
-                new AlertDialog.Builder(view_capture.this)
-                        .setTitle("Prediction")
-                        .setMessage(Integer.toString(myprediction))
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    new AlertDialog.Builder(view_capture.this)
+                            .setTitle("Prediction")
+                            .setMessage(Integer.toString(myprediction))
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setPositiveButton("CORRECT", new DialogInterface.OnClickListener() {
 
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                String img_label = Integer.toString(myprediction);
-                                String img_type = "digit";
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    String img_label = Integer.toString(myprediction);
+                                    String img_type = "digit";
 
-                                String myUrl = "https://rest-blur.herokuapp.com/images/";
-                                HttpPOSTRequest postRequest = new HttpPOSTRequest();
+                                    String myUrl = "https://rest-blur.herokuapp.com/images/";
+                                    HttpPOSTRequest postRequest = new HttpPOSTRequest();
 
-                                try {
-                                    postRequest.execute(myUrl, img.toString(), img_label, img_type);
-                                } catch(Exception e) {
-                                    Log.d("Error", e.toString());
+                                    try {
+                                        postRequest.execute(myUrl, img.toString(), img_label, img_type);
+                                    } catch (Exception e) {
+                                        Log.d("Error", e.toString());
+                                    }
+
+                                    Intent intent = new Intent(view_capture.this, capture.class).putExtra("text", "Sent to DB");
+                                    startActivity(intent);
+
                                 }
+                            })
+                            .setNegativeButton("INCORRECT", new DialogInterface.OnClickListener() {
 
-                                Intent intent = new Intent(view_capture.this, capture.class).putExtra("text", "Sent to DB");
-                                startActivity(intent);
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    //ask for user input
+                                    AlertDialog.Builder alert = new AlertDialog.Builder(view_capture.this);
 
-                            }})
-                        .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                                    alert.setTitle("What "+type+" was it?");
 
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                //ask for user input
-                                AlertDialog.Builder alert = new AlertDialog.Builder(view_capture.this);
+                                    final EditText input = new EditText(view_capture.this);
 
-                                alert.setTitle("What digit was it? (0-9)");
-
-                                final EditText input = new EditText(view_capture.this);
-                                alert.setView(input);
-
-                                alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-
-                                        String img_label = input.getText().toString();
-                                        String img_type = "digit";
-
-                                        String myUrl = "https://rest-blur.herokuapp.com/images/";
-                                        HttpPOSTRequest postRequest = new HttpPOSTRequest();
-
-                                        try {
-                                            postRequest.execute(myUrl, img.toString(), img_label, img_type);
-                                        } catch(Exception e) {
-                                            Log.d("Error", e.toString());
+                                    if (type.equals("digit")) {
+                                        InputFilter[] fArray = new InputFilter[1];
+                                        fArray[0] = new InputFilter.LengthFilter(1);
+                                        input.setFilters(fArray);
+                                        alert.setView(input);
+                                    } else {
+                                        if (type.equals("letter")) {
+                                            InputFilter[] fArray = new InputFilter[1];
+                                            fArray[0] = new InputFilter.LengthFilter(1);
+                                            input.setFilters(fArray);
+                                            alert.setView(input);
+                                        } else {
+                                            InputFilter[] fArray = new InputFilter[1];
+                                            fArray[0] = new InputFilter.LengthFilter(20);
+                                            input.setFilters(fArray);
+                                            alert.setView(input);
                                         }
-
-                                        Intent intent = new Intent(view_capture.this, capture.class).putExtra("text", "Sent to DB - Thank you!");
-                                        startActivity(intent);
                                     }
-                                });
 
-                                alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int whichButton) {
-                                        Intent intent = new Intent(view_capture.this, capture.class).putExtra("text", "Not Sent");
-                                        startActivity(intent);
-                                    }
-                                });
 
-                                alert.show();
+                                    alert.setPositiveButton("SEND", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
 
-                            }}).show();
+                                            String img_label = input.getText().toString();
+                                            String img_type = type;
+
+                                            String myUrl = "https://rest-blur.herokuapp.com/images/";
+                                            HttpPOSTRequest postRequest = new HttpPOSTRequest();
+
+                                            try {
+                                                postRequest.execute(myUrl, img.toString(), img_label, img_type);
+                                            } catch (Exception e) {
+                                                Log.d("Error", e.toString());
+                                            }
+
+                                            Intent intent = new Intent(view_capture.this, capture.class).putExtra("text", "Sent to DB - Thank you!");
+                                            startActivity(intent);
+                                        }
+                                    });
+
+                                    alert.setNegativeButton("DON'T SEND", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int whichButton) {
+                                            Intent myintent = getIntent();
+                                            final String type;
+
+                                            try {
+                                                type = myintent.getExtras().getString("type");
+                                                Intent intent = new Intent(view_capture.this, capture.class).putExtra("text", "Not Sent").putExtra("type", type);
+                                                startActivity(intent);
+                                            } catch(Exception e) {
+                                                Log.d("Error", e.toString());
+                                            }
+                                        }
+                                    });
+
+                                    alert.show();
+
+                                }
+                            }).show();
+
+                } catch (Exception e) {
+                    Log.d("Error", e.toString());
+                }
 
             }
         });
@@ -142,9 +180,25 @@ public class view_capture extends AppCompatActivity {
         findViewById(R.id.noButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(view_capture.this, capture.class).putExtra("text", "Try again");
-                startActivity(intent);
+                Intent myintent = getIntent();
+                final String type;
+
+                try {
+                    type = myintent.getExtras().getString("type");
+                    Intent intent = new Intent(view_capture.this, capture.class).putExtra("text", "Try again").putExtra("type", type);
+                    startActivity(intent);
+                } catch(Exception e) {
+                    Log.d("Error", e.toString());
+                }
         }});
 
     }
+
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(view_capture.this, main.class);
+        startActivity(intent);
+    }
+
 }
